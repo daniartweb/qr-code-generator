@@ -2,17 +2,18 @@
 
 import React, { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Download, Share2, RefreshCw, Type, Link as LinkIcon, FileCode } from 'lucide-react';
+import { Download, Share2, RefreshCw, Type, Link as LinkIcon, FileCode, Palette } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { showSuccess } from "@/utils/toast";
 
 const QRCodeGenerator = () => {
   const [value, setValue] = useState('https://example.com');
-  const [fgColor, setFgColor] = useState('#000000');
+  const [fgColor, setFgColor] = useState('#4F46E5');
   const [size, setSize] = useState(256);
   const qrRef = useRef<SVGSVGElement>(null);
 
@@ -65,7 +66,7 @@ const QRCodeGenerator = () => {
         </div>
 
         <Card className="p-6 border-none shadow-xl shadow-slate-200/50 bg-white rounded-3xl">
-          <Tabs defaultValue="url" className="w-full">
+          <Tabs defaultValue="url" className="w-full" onValueChange={() => setValue('')}>
             <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-100 p-1 rounded-2xl">
               <TabsTrigger value="url" className="rounded-xl flex gap-2">
                 <LinkIcon size={16} /> URL
@@ -75,47 +76,69 @@ const QRCodeGenerator = () => {
               </TabsTrigger>
             </TabsList>
             
-            <div className="space-y-6">
+            <TabsContent value="url" className="space-y-6 mt-0">
               <div className="space-y-2">
-                <Label htmlFor="content" className="text-sm font-semibold text-slate-700">
-                  Content
+                <Label htmlFor="url-content" className="text-sm font-semibold text-slate-700">
+                  Website URL
                 </Label>
                 <Input
-                  id="content"
+                  id="url-content"
                   placeholder="https://example.com"
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   className="h-12 rounded-xl border-slate-200 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
+            </TabsContent>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="color" className="text-sm font-semibold text-slate-700">
-                    QR Color
+            <TabsContent value="text" className="space-y-6 mt-0">
+              <div className="space-y-2">
+                <Label htmlFor="text-content" className="text-sm font-semibold text-slate-700">
+                  Plain Text
+                </Label>
+                <Textarea
+                  id="text-content"
+                  placeholder="Enter your message here..."
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  className="min-h-[120px] rounded-xl border-slate-200 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                />
+              </div>
+            </TabsContent>
+
+            <div className="mt-6 pt-6 border-t border-slate-100">
+              <div className="flex flex-wrap items-end gap-4">
+                <div className="flex-1 min-w-[140px] space-y-2">
+                  <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    <Palette size={14} /> QR Color
                   </Label>
-                  <div className="flex gap-2 items-center">
-                    <input
-                      type="color"
-                      id="color"
+                  <div className="relative flex items-center">
+                    <div 
+                      className="absolute left-3 w-6 h-6 rounded-full border border-slate-200 shadow-sm pointer-events-none"
+                      style={{ backgroundColor: fgColor }}
+                    />
+                    <Input
+                      type="text"
                       value={fgColor}
                       onChange={(e) => setFgColor(e.target.value)}
-                      className="h-10 w-full rounded-xl cursor-pointer border-none p-0 overflow-hidden"
+                      className="pl-11 h-11 rounded-xl border-slate-200 font-mono text-sm"
+                    />
+                    <input
+                      type="color"
+                      value={fgColor}
+                      onChange={(e) => setFgColor(e.target.value)}
+                      className="absolute right-2 w-8 h-8 opacity-0 cursor-pointer"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-slate-700">
-                    Quick Actions
-                  </Label>
-                  <Button 
-                    variant="outline" 
-                    className="w-full h-10 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50"
-                    onClick={() => setValue('')}
-                  >
-                    <RefreshCw size={16} className="mr-2" /> Clear
-                  </Button>
-                </div>
+                
+                <Button 
+                  variant="outline" 
+                  className="h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 px-4"
+                  onClick={() => setValue('')}
+                >
+                  <RefreshCw size={16} className="mr-2" /> Reset
+                </Button>
               </div>
             </div>
           </Tabs>
@@ -124,7 +147,7 @@ const QRCodeGenerator = () => {
 
       <div className="flex flex-col items-center justify-center lg:sticky lg:top-8">
         <Card className="p-10 border-none shadow-2xl shadow-indigo-100 bg-white rounded-[2.5rem] flex flex-col items-center gap-8 w-full max-w-md">
-          <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
+          <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 transition-all duration-300 hover:shadow-inner">
             <QRCodeSVG
               ref={qrRef}
               value={value || ' '}
