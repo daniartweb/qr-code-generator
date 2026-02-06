@@ -16,6 +16,7 @@ const QRCodeGenerator = () => {
   const [fgColor, setFgColor] = useState('#4F46E5');
   const [size, setSize] = useState(256);
   const qrRef = useRef<SVGSVGElement>(null);
+  const colorInputRef = useRef<HTMLInputElement>(null);
 
   const downloadPNG = () => {
     const svg = qrRef.current;
@@ -55,6 +56,10 @@ const QRCodeGenerator = () => {
     downloadLink.click();
     document.body.removeChild(downloadLink);
     showSuccess("QR Code downloaded as SVG!");
+  };
+
+  const handleColorBlobClick = () => {
+    colorInputRef.current?.click();
   };
 
   return (
@@ -112,22 +117,26 @@ const QRCodeGenerator = () => {
                   <Label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <Palette size={14} /> QR Color
                   </Label>
-                  <div className="relative flex items-center">
-                    <div 
-                      className="absolute left-3 w-6 h-6 rounded-full border border-slate-200 shadow-sm pointer-events-none"
+                  <div className="relative flex items-center group">
+                    <button 
+                      type="button"
+                      onClick={handleColorBlobClick}
+                      className="absolute left-3 w-6 h-6 rounded-full border border-slate-200 shadow-sm z-10 transition-transform hover:scale-110 active:scale-95"
                       style={{ backgroundColor: fgColor }}
+                      title="Open color picker"
                     />
                     <Input
                       type="text"
                       value={fgColor}
                       onChange={(e) => setFgColor(e.target.value)}
-                      className="pl-11 h-11 rounded-xl border-slate-200 font-mono text-sm"
+                      className="pl-11 h-11 rounded-xl border-slate-200 font-mono text-sm focus:ring-indigo-500"
                     />
                     <input
+                      ref={colorInputRef}
                       type="color"
                       value={fgColor}
                       onChange={(e) => setFgColor(e.target.value)}
-                      className="absolute right-2 w-8 h-8 opacity-0 cursor-pointer"
+                      className="absolute right-2 w-8 h-8 opacity-0 pointer-events-none"
                     />
                   </div>
                 </div>
@@ -135,7 +144,10 @@ const QRCodeGenerator = () => {
                 <Button 
                   variant="outline" 
                   className="h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 px-4"
-                  onClick={() => setValue('')}
+                  onClick={() => {
+                    setValue('');
+                    setFgColor('#4F46E5');
+                  }}
                 >
                   <RefreshCw size={16} className="mr-2" /> Reset
                 </Button>
