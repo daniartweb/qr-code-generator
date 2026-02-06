@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { 
   Download, Share2, RefreshCw, Type, Link as LinkIcon, 
-  FileCode, Palette, Wifi, Mail, Settings2, ShieldCheck
+  FileCode, Palette, Wifi, Mail, Settings2, ShieldCheck, Save
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,11 +13,18 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { showSuccess } from "@/utils/toast";
+import { showSuccess, showError } from "@/utils/toast";
+import { useAuth } from './AuthProvider';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 const QRCodeGenerator = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('url');
   const [value, setValue] = useState('https://example.com');
+  const [qrName, setQrName] = useState('My QR Code');
+  const [isSaving, setIsSaving] = useState(false);
   
   // WiFi State
   const [wifiSsid, setWifiSsid] = useState('');
@@ -39,7 +46,6 @@ const QRCodeGenerator = () => {
   const fgColorRef = useRef<HTMLInputElement>(null);
   const bgColorRef = useRef<HTMLInputElement>(null);
 
-  // Update QR value based on active tab and inputs
   useEffect(() => {
     if (activeTab === 'wifi') {
       setValue(`WIFI:S:${wifiSsid};T:${wifiEnc};P:${wifiPass};;`);
@@ -47,6 +53,32 @@ const QRCodeGenerator = () => {
       setValue(`mailto:${emailAddr}?subject=${encodeURIComponent(emailSub)}&body=${encodeURIComponent(emailBody)}`);
     }
   }, [activeTab, wifiSsid, wifiPass, wifiEnc, emailAddr, emailSub, emailBody]);
+
+  const saveQRCode = async () => {
+    if (!user) {
+      showError("Please sign in to save QR codes");
+      navigate('/login');
+      return;
+    }
+
+    setIsSaving(true);
+    const { error } = await supabase.from('qr_codes').insert({
+      user_id: user.id,
+      name: qrName || 'Untitled QR',
+      type: activeTab,
+      content: value,
+      fg_color: fgColor,
+      bg_color: bgColor,
+      level: level
+    });
+
+    if (error) {
+      showError("Failed to save QR code");
+    } else {
+      showSuccess("QR code saved to your history!");
+    }
+    setIsSaving(false);
+  };
 
   const downloadPNG = () => {
     const svg = qrRef.current;
@@ -93,6 +125,16 @@ const QRCodeGenerator = () => {
         </div>
 
         <Card className="p-8 border-none shadow-2xl shadow-slate-200/60 bg-white rounded-[2rem]">
+          <div className="mb-8 space-y-2">
+            <Label className="text-sm font-bold text-slate-700">QR Code Name</Label>
+            <Input 
+              placeholder="e.g. My Portfolio Website" 
+              value={qrName} 
+              onChange={(e) => setQrName(e.target.value)}
+              className="h-12 rounded-xl border-slate-200"
+            />
+          </div>
+
           <Tabs defaultValue="url" className="w-full" onValueChange={(v) => { setActiveTab(v); setValue(''); }}>
             <TabsList className="grid w-full grid-cols-4 mb-8 bg-slate-100/80 p-1.5 rounded-2xl">
               <TabsTrigger value="url" className="rounded-xl py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm">
@@ -267,28 +309,26 @@ const QRCodeGenerator = () => {
 
           <div className="flex flex-col w-full gap-3">
             <Button 
-              onClick={downloadPNG}
+              onClick={saveQRCode}
+              disabled={isSaving}
               className="w-full h-16 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-xl shadow-indigo-200 transition-all active:scale-95"
             >
-              <Download className="mr-2" size={22} /> Download PNG
+              <Save className="mr-2" size={22} /> {isSaving ? 'Saving...' : 'Save to History'}
             </Button>
             <div className="grid grid-cols-2 gap-3">
+              <Button 
+                variant="outline"
+                onClick={downloadPNG}
+                className="h-14 rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold"
+              >
+                <Download className="mr-2" size={18} /> PNG
+              </Button>
               <Button 
                 variant="outline"
                 onClick={downloadSVG}
                 className="h-14 rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold"
               >
                 <FileCode className="mr-2" size={18} /> SVG
-              </Button>
-              <Button 
-                variant="outline"
-                className="h-14 rounded-2xl border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold"
-                onClick={() => {
-                  navigator.clipboard.writeText(value);
-                  showSuccess("Copied to clipboard!");
-                }}
-              >
-                <Share2 className="mr-2" size={18} /> Copy
               </Button>
             </div>
           </div>
