@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { QrCode, UserCircle, LogOut, LayoutDashboard, Plus } from 'lucide-react';
+import { QrCode, UserCircle, LogOut, LayoutDashboard, Plus, UserPlus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from './AuthProvider';
 import { useNavigate, Link } from 'react-router-dom';
@@ -72,13 +72,22 @@ const Header = () => {
             </DropdownMenu>
           </div>
         ) : (
-          <Button 
-            className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-6 flex gap-2"
-            onClick={() => navigate('/login')}
-          >
-            <UserCircle size={18} />
-            Sign In
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost"
+              className="text-slate-600 hover:text-indigo-600 rounded-xl px-4 hidden sm:flex"
+              onClick={() => navigate('/login')}
+            >
+              Sign In
+            </Button>
+            <Button 
+              className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-6 flex gap-2 shadow-lg shadow-indigo-100"
+              onClick={() => navigate('/login')}
+            >
+              <UserPlus size={18} />
+              Get Started
+            </Button>
+          </div>
         )}
       </nav>
     </header>
