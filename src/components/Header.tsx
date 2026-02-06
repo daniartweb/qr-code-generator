@@ -1,7 +1,8 @@
 "use client";
 
 import React from 'react';
-import { QrCode } from 'lucide-react';
+import { QrCode, UserCircle } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const Header = () => {
   return (
@@ -12,10 +13,14 @@ const Header = () => {
         </div>
         <h1 className="text-xl font-bold tracking-tight text-slate-900">QuickQR</h1>
       </div>
-      <nav>
-        <span className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-          Minimalist Generator
-        </span>
+      <nav className="flex items-center gap-4">
+        <Button variant="ghost" className="text-slate-600 hover:text-indigo-600 rounded-xl">
+          Pricing
+        </Button>
+        <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-6 flex gap-2">
+          <UserCircle size={18} />
+          Sign In
+        </Button>
       </nav>
     </header>
   );

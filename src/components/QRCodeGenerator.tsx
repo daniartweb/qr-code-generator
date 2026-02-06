@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Download, Share2, RefreshCw, Type, Link as LinkIcon } from 'lucide-react';
+import { Download, Share2, RefreshCw, Type, Link as LinkIcon, FileCode } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,12 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { showSuccess } from "@/utils/toast";
 
 const QRCodeGenerator = () => {
-  const [value, setValue] = useState('https://dyad.sh');
+  const [value, setValue] = useState('https://example.com');
   const [fgColor, setFgColor] = useState('#000000');
   const [size, setSize] = useState(256);
   const qrRef = useRef<SVGSVGElement>(null);
 
-  const downloadQRCode = () => {
+  const downloadPNG = () => {
     const svg = qrRef.current;
     if (!svg) return;
 
@@ -34,10 +34,26 @@ const QRCodeGenerator = () => {
       downloadLink.download = "qrcode.png";
       downloadLink.href = pngFile;
       downloadLink.click();
-      showSuccess("QR Code downloaded successfully!");
+      showSuccess("QR Code downloaded as PNG!");
     };
 
     img.src = "data:image/svg+xml;base64," + btoa(svgData);
+  };
+
+  const downloadSVG = () => {
+    const svg = qrRef.current;
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+    const svgUrl = URL.createObjectURL(svgBlob);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = svgUrl;
+    downloadLink.download = "qrcode.svg";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    showSuccess("QR Code downloaded as SVG!");
   };
 
   return (
@@ -66,7 +82,7 @@ const QRCodeGenerator = () => {
                 </Label>
                 <Input
                   id="content"
-                  placeholder={value === 'url' ? "https://example.com" : "Enter your text here..."}
+                  placeholder="https://example.com"
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   className="h-12 rounded-xl border-slate-200 focus:ring-indigo-500 focus:border-indigo-500"
@@ -121,10 +137,17 @@ const QRCodeGenerator = () => {
 
           <div className="flex flex-col w-full gap-3">
             <Button 
-              onClick={downloadQRCode}
+              onClick={downloadPNG}
               className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <Download className="mr-2" size={20} /> Download PNG
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={downloadSVG}
+              className="w-full h-14 rounded-2xl border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-semibold transition-all"
+            >
+              <FileCode className="mr-2" size={20} /> Download SVG
             </Button>
             <Button 
               variant="ghost"
