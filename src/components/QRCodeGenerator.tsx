@@ -13,7 +13,7 @@ import { showSuccess } from "@/utils/toast";
 
 const QRCodeGenerator = () => {
   const [value, setValue] = useState('https://example.com');
-  const [fgColor, setFgColor] = useState('#4F46E5');
+  const [fgColor, setFgColor] = useState('#000000');
   const [size, setSize] = useState(256);
   const qrRef = useRef<SVGSVGElement>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
@@ -146,7 +146,7 @@ const QRCodeGenerator = () => {
                   className="h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 px-4"
                   onClick={() => {
                     setValue('');
-                    setFgColor('#4F46E5');
+                    setFgColor('#000000');
                   }}
                 >
                   <RefreshCw size={16} className="mr-2" /> Reset
